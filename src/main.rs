@@ -16,6 +16,5 @@ fn main() -> Result<(), Error> {
         Error::new(ErrorKind::NotFound, "File didn't exists");
     }
     println!("size {}", md.size());
-    println!("permission {:?}", md.permissions());
     Ok(())
 }
