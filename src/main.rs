@@ -1,24 +1,54 @@
 use std::{
-    env, fs,
-    io::{Error, ErrorKind},
-    os::unix::fs::MetadataExt,
+    env::{self},
+    fs,
 };
+mod reciever;
+mod sender;
 
-const BLOCK_SIZE: u64 = 4000;
+#[derive(Debug)]
+enum Purpose {
+    SEND,
+    RECIEVE,
+}
 
-fn main() -> Result<(), Error> {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        println!("Provide the path of the file to send!!");
-        Error::new(ErrorKind::InvalidFilename, "no file provided");
+fn main() {
+    let purpose: Purpose;
+    let mut args: Vec<String> = env::args().collect();
+    if args.len() < 3 {
+        println!("Expected at least 3 args while we got {}", args.len());
+        return;
     }
-    let md = fs::metadata(&args[1])?;
-    if !md.is_file() {
-        println!("File didn't exists");
-        Error::new(ErrorKind::NotFound, "File didn't exists");
+    if args[1].to_ascii_uppercase() == "SEND" {
+        purpose = Purpose::SEND;
+    } else if args[1].to_ascii_uppercase() == "RECIEVE" {
+        purpose = Purpose::RECIEVE
+    } else {
+        println!(
+            "Unexpected args!! Recieved {}, expecting SEND or RECIEVE",
+            args[1]
+        );
+        return;
     }
-    // get the number of blocks
-    let BLOCKS = (md.size() + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    println!("{}", BLOCKS);
-    Ok(())
+
+    match purpose {
+        Purpose::SEND => {
+            let file_path = args.remove(2);
+            let ip_addr = &args[2];
+            if !fs::metadata(&file_path)
+                .expect("file metadata expected")
+                .is_file()
+            {
+                println!(
+                    "Expected File!! Provided path is not belong to file {}",
+                    file_path
+                );
+                return;
+            }
+            sender::sender(file_path);
+        }
+        Purpose::RECIEVE => {
+            let ip_addr = &args[2];
+            reciever::Reciever();
+        }
+    }
 }
