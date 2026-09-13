@@ -4,6 +4,8 @@ use std::{
     os::unix::fs::MetadataExt,
 };
 
+const BLOCK_SIZE: u64 = 4000;
+
 fn main() -> Result<(), Error> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -15,6 +17,8 @@ fn main() -> Result<(), Error> {
         println!("File didn't exists");
         Error::new(ErrorKind::NotFound, "File didn't exists");
     }
-    println!("size {}", md.size());
+    // get the number of blocks
+    let BLOCKS = (md.size() + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    println!("{}", BLOCKS);
     Ok(())
 }
