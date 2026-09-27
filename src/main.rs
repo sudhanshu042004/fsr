@@ -1,6 +1,7 @@
 use std::{
     env::{self},
     fs,
+    path::Path,
 };
 mod reciever;
 mod sender;
@@ -33,7 +34,7 @@ fn main() {
     match purpose {
         Purpose::SEND => {
             let file_path = args.remove(2);
-            let ip_addr = &args[2];
+            let ip_addr = args.remove(2);
             if !fs::metadata(&file_path)
                 .expect("file metadata expected")
                 .is_file()
@@ -44,10 +45,10 @@ fn main() {
                 );
                 return;
             }
-            sender::sender(file_path);
+            sender::sender(Path::new(&file_path), ip_addr);
         }
         Purpose::RECIEVE => {
-            let ip_addr = &args[2];
+            let ip_addr = args.remove(2);
             reciever::Reciever();
         }
     }
