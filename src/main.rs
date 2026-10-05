@@ -3,8 +3,10 @@ use std::{
     fs,
     path::Path,
 };
+
+mod manifest;
 mod reciever;
-mod sender;
+mod types;
 
 #[derive(Debug)]
 enum Purpose {
@@ -34,7 +36,7 @@ fn main() {
     match purpose {
         Purpose::SEND => {
             let file_path = args.remove(2);
-            let ip_addr = args.remove(2);
+            let _ip_addr = args.remove(2);
             if !fs::metadata(&file_path)
                 .expect("file metadata expected")
                 .is_file()
@@ -45,10 +47,16 @@ fn main() {
                 );
                 return;
             }
-            sender::sender(Path::new(&file_path), ip_addr);
+            let _manifest = match manifest::manifest_create(Path::new(&file_path)) {
+                Ok(md) => md,
+                Err(e) => {
+                    println!("Error while parsing metadata : {}", e);
+                    return;
+                }
+            };
         }
         Purpose::RECIEVE => {
-            let ip_addr = args.remove(2);
+            let _ip_addr = args.remove(2);
             reciever::Reciever();
         }
     }
